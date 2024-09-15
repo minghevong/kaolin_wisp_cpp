@@ -1,0 +1,3 @@
+[submodule "submodules/kaolin"]
+	path = submodules/kaolin
+	url = https://github.com/jianhengLiu/kaolin.git
