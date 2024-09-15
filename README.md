@@ -10,3 +10,11 @@
   unzip libtorch-cxx11-abi-shared-with-deps-*.zip
   echo "export Torch_DIR=$PWD/libtorch/share/cmake/Torch" >> ~/.zshrc
 ```
+
+CMakelist.txt
+```bash
+# kaolin_wisp_cpp
+add_subdirectory(submodules/kaolin_wisp_cpp)
+include_directories(submodules/kaolin_wisp_cpp
+                    submodules/kaolin_wisp_cpp/submodules/kaolin)
+```
