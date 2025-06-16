@@ -15,6 +15,14 @@ file(
   submodules/kaolin/kaolin/csrc/render/*.cpp
   submodules/kaolin/kaolin/csrc/render/*.cu)
 
+list(
+  FILTER
+  KAOLIN_SOURCES
+  EXCLUDE
+  REGEX
+  "submodules/kaolin/kaolin/csrc/ops/spc/bf.cpp|submodules/kaolin/kaolin/csrc/ops/spc/bf_cuda.cu|submodules/kaolin/kaolin/csrc/ops/spc/recon.cpp|submodules/kaolin/kaolin/csrc/ops/spc/recon_cuda.cu"
+)
+
 add_library(
   kaolin_wisp_cpp
   kaolin_wisp_cpp/spc_ops/spc_ops.cpp
