@@ -20,7 +20,7 @@ list(
   KAOLIN_SOURCES
   EXCLUDE
   REGEX
-  "submodules/kaolin/kaolin/csrc/ops/spc/bf.cpp|submodules/kaolin/kaolin/csrc/ops/spc/bf_cuda.cu|submodules/kaolin/kaolin/csrc/ops/spc/recon.cpp|submodules/kaolin/kaolin/csrc/ops/spc/recon_cuda.cu"
+  "submodules/kaolin/kaolin/csrc/ops/mesh/triangle_hash.cpp|submodules/kaolin/kaolin/csrc/ops/spc/bf.cpp|submodules/kaolin/kaolin/csrc/ops/spc/bf_cuda.cu|submodules/kaolin/kaolin/csrc/ops/spc/recon.cpp|submodules/kaolin/kaolin/csrc/ops/spc/recon_cuda.cu"
 )
 
 add_library(
