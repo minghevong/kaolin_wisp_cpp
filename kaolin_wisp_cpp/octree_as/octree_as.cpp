@@ -7,7 +7,8 @@
 #include "spc_ops/spc_ops.h"
 #include "wisp_spc_ops/wisp_spc_ops.h"
 
-OctreeAS *from_pointcloud(const torch::Tensor &pointcloud, const int &level) {
+OctreeAS *from_pointcloud(const torch::Tensor &pointcloud, const int &level)
+{
   /*
   Builds the acceleration structure and initializes occupancy of cells from a
   pointcloud. The cells occupancy will be determined by points occupying the
@@ -24,7 +25,8 @@ OctreeAS *from_pointcloud(const torch::Tensor &pointcloud, const int &level) {
   return new OctreeAS(octree_pair.first, octree_pair.second);
 }
 
-OctreeAS *from_quantized_points(torch::Tensor quantized_points, int level) {
+OctreeAS *from_quantized_points(torch::Tensor quantized_points, int level)
+{
   torch::Tensor octree =
       spc_ops::unbatched_points_to_octree(quantized_points, level, false);
   return new OctreeAS(octree);
@@ -32,7 +34,8 @@ OctreeAS *from_quantized_points(torch::Tensor quantized_points, int level) {
 
 OctreeAS::OctreeAS(const torch::Tensor &_octree,
                    const torch::Tensor &_attributes)
-    : octree_(_octree) {
+    : octree_(_octree)
+{
 
   auto octree_info = wisp_spc_ops::octree_to_spc(octree_);
   points_ = std::get<0>(octree_info);
@@ -42,12 +45,14 @@ OctreeAS::OctreeAS(const torch::Tensor &_octree,
   max_level_ = pyramid_.size(-1) - 2;
 }
 
-torch::Tensor OctreeAS::get_quantized_points() {
+torch::Tensor OctreeAS::get_quantized_points()
+{
   return spc_ops::unbatched_get_level_points(points_, pyramid_, max_level_);
 }
 
 ASQueryResults OctreeAS::query(const torch::Tensor &coords, int level,
-                               bool with_parents) {
+                               bool with_parents)
+{
   /*
   """Returns the ``pidx`` for the sample coordinates (indices of acceleration
   structure cells returned by this query).
@@ -64,23 +69,30 @@ ASQueryResults OctreeAS::query(const torch::Tensor &coords, int level,
   [num_query, level+1].
   """
    */
-  if (level < 0) {
+  if (level < 0)
+  {
     level = this->max_level_;
   }
 
   torch::Tensor input_coords;
-  if (coords.is_floating_point()) {
+  if (coords.is_floating_point())
+  {
     input_coords = coords;
-  } else {
+  }
+  else
+  {
     input_coords = (coords.to(torch::kFloat32) / pow(2, level)) * 2.0 - 1.0;
   }
 
   torch::Tensor pidx;
-  if (with_parents) {
+  if (with_parents)
+  {
     kaolin::query_multiscale_cuda(octree_, prefix_, input_coords.contiguous(),
                                   level)
         .to(torch::kLong);
-  } else {
+  }
+  else
+  {
     pidx =
         kaolin::query_cuda(octree_, prefix_, input_coords.contiguous(), level)
             .to(torch::kLong);
@@ -90,7 +102,8 @@ ASQueryResults OctreeAS::query(const torch::Tensor &coords, int level,
 
 ASRaytraceResults OctreeAS::raytrace(const torch::Tensor &origins,
                                      const torch::Tensor &dirs, int level,
-                                     bool with_exit) {
+                                     bool with_exit)
+{
   /* """Traces rays against the SPC structure, returning all intersections along
   the ray with the SPC points (SPC points are quantized, and can be interpreted
   as octree cell centers or corners).
@@ -106,7 +119,8 @@ ASRaytraceResults OctreeAS::raytrace(const torch::Tensor &origins,
           - Indices into the point_hierarchy of shape [num_intersections]
           - Depths of shape [num_intersections, 1 or 2]
   """ */
-  if (level == -1) {
+  if (level == -1)
+  {
     level = max_level_;
   }
 
@@ -123,7 +137,8 @@ ASRaytraceResults OctreeAS::raytrace(const torch::Tensor &origins,
 
 ASRaymarchResults OctreeAS::_raymarch_voxel(const torch::Tensor &origins,
                                             const torch::Tensor &dirs,
-                                            int num_samples, int level) {
+                                            int num_samples, int level)
+{
   /*
   """Samples points along the ray inside the SPC structure.
   Raymarch is achieved by intersecting the rays with the SPC cells.
@@ -147,7 +162,8 @@ ASRaymarchResults OctreeAS::_raymarch_voxel(const torch::Tensor &origins,
             sample pack of shape [num_hit_samples]
   """
    */
-  if (level == -1) {
+  if (level == -1)
+  {
     level = max_level_;
   }
 
@@ -279,10 +295,12 @@ ASRaymarchResults OctreeAS::_raymarch_voxel(const torch::Tensor &origins,
 
 //     return ASRaymarchResults(ridx, samples, depth_samples, deltas, boundary);
 //   }
-ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins,
-                                     const torch::Tensor &dirs,
-                                     const std::string &raymarch_type,
-                                     int num_samples, int level) {
+ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins,     // 射线起点坐标
+                                     const torch::Tensor &dirs,        // 每个射线的方向向量。
+                                     const std::string &raymarch_type, // e.g. "voxel"
+                                     int num_samples,                  // e.g. 1
+                                     int level)                        // -1
+{
   /*
   """Samples points along the ray inside the SPC structure.
   The exact algorithm employed for raymarching is determined by `raymarch_type`.
@@ -311,7 +329,8 @@ ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins,
   """
    */
 
-  if (level == -1) {
+  if (level == -1)
+  {
     level = max_level_;
   }
 
@@ -322,7 +341,8 @@ ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins,
   each voxel. This setting is pretty nice for getting decent outputs from
   outside-looking-in scenes, but in general it's not very robust or proper
   since the ray samples will be weirdly distributed # and or aliased. */
-  if (raymarch_type == "voxel") {
+  if (raymarch_type == "voxel")
+  {
     raymarch_results = _raymarch_voxel(origins, dirs, num_samples, level);
   }
   /* Samples points along the rays, and then uses the SPC object the filter
@@ -336,7 +356,8 @@ ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins,
   // else if (raymarch_type == "uniform") {
   //     raymarch_results = _raymarch_uniform(rays, num_samples, level);
   //   }
-  else {
+  else
+  {
     throw std::invalid_argument(
         "Raymarch sampler type is not supported by OctreeAS.");
   }
@@ -344,11 +365,12 @@ ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins,
   return raymarch_results;
 }
 
-ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins,
-                                     const torch::Tensor &dirs,
+ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins, // 射线起点坐标
+                                     const torch::Tensor &dirs,    // 每个射线的方向向量。
                                      const torch::Tensor &depths,
                                      const std::string &raymarch_type,
-                                     int num_samples, int level) {
+                                     int num_samples, int level)
+{
   /*
   """Samples points along the ray inside the SPC structure.
   The exact algorithm employed for raymarching is determined by `raymarch_type`.
@@ -377,7 +399,8 @@ ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins,
   """
    */
 
-  if (level == -1) {
+  if (level == -1)
+  {
     level = max_level_;
   }
 
