@@ -306,17 +306,16 @@ ASRaymarchResults OctreeAS::raymarch(const torch::Tensor &origins,     // 射线
   The exact algorithm employed for raymarching is determined by `raymarch_type`.
 
   Args:
-      rays (wisp.core.Rays): Ray origins and directions of shape [batch, 3].
-      raymarch_type (str): Sampling strategy to use for raymarch.
-          'voxel' - intersects the rays with the SPC cells. Then among the
-  intersected cells, each cell is sampled num_samples times. In this scheme,
-  num_hit_samples <= num_intersections*num_samples 'ray' - samples num_samples
-  along each ray, and then filters out samples which falls outside of occupied
-              cells.
-              In this scheme, num_hit_samples <= num_rays * num_samples
-      num_samples (int) : Number of samples generated per voxel or ray. The
-  exact meaning of this arg depends on the value of `raymarch_type`. level (int)
-  : The level of the octree to raytrace. If None, traces the highest level.
+      rays (wisp.core.Rays):  Ray origins and directions of shape [batch, 3].
+      raymarch_type (str):    Sampling strategy to use for raymarch.
+                              'voxel' - intersects the rays with the SPC cells. Then among the
+                              intersected cells, each cell is sampled num_samples times. In this scheme,
+                              num_hit_samples <= num_intersections*num_samples 'ray' - samples num_samples
+                              along each ray, and then filters out samples which falls outside of occupied cells.
+                              In this scheme, num_hit_samples <= num_rays * num_samples
+                              
+      num_samples (int) :     Number of samples generated per voxel or ray. Theexact meaning of this arg depends on the value of `raymarch_type`. 
+      level (int):            The level of the octree to raytrace. If None, traces the highest level.
 
   Returns:
       (ASRaymarchResults) with fields containing:
