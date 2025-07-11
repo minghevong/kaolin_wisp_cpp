@@ -70,6 +70,7 @@ torch::Tensor dilate_points(torch::Tensor points, int level) {
 torch::Tensor unbatched_points_to_octree(torch::Tensor points, int level,
                                          bool sorted) {
   if (!sorted) {
+    //去除重复的点坐标（栅格3维坐标），返回unique.shape=(N,3)
     torch::Tensor unique =
         std::get<0>(torch::unique_dim(points.contiguous(), 0)).contiguous();
     torch::Tensor morton =
