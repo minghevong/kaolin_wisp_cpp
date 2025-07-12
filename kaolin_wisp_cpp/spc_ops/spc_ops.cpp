@@ -73,10 +73,14 @@ torch::Tensor unbatched_points_to_octree(torch::Tensor points, int level,
     //去除重复的点坐标（栅格3维坐标），返回unique.shape=(N,3)
     torch::Tensor unique =
         std::get<0>(torch::unique_dim(points.contiguous(), 0)).contiguous();
+    // points_to_morton计算量化后的三维坐标的一维莫顿码（N, ）。并对莫顿编码排序sort。
     torch::Tensor morton =
         std::get<0>(torch::sort(points_to_morton(unique).contiguous()));
+    // 将排序后的一维莫顿码映射三维空间。shape=(N, 3)
     points = morton_to_points(morton.contiguous());
   }
+
+  // 将有序的3D点转为莫顿码，再将Morton码转换为八叉树表示。输出一个包含八叉树数据的字节张量。
   return kaolin::points_to_octree(points.contiguous(), level);
 }
 
