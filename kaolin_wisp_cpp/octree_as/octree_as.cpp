@@ -25,6 +25,8 @@ OctreeAS *from_pointcloud(const torch::Tensor &pointcloud, const int &level)
   return new OctreeAS(octree_pair.first, octree_pair.second);
 }
 
+// 实现：将量化后的3D坐标转为一位莫顿码，对莫顿码排序后再映射回3D点。
+// 最后将Morton码转换为八叉树表示，输出一个包含八叉树数据的字节张量。
 OctreeAS *from_quantized_points(torch::Tensor quantized_points, int level)
 {
   torch::Tensor octree =
