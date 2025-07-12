@@ -19,7 +19,7 @@ OctreeAS *from_pointcloud(const torch::Tensor &pointcloud, const int &level)
   3] in normalized space [-1, 1].
       level (int): Depth of the octree (number of occupancy levels), used by
   acceleration structure for fast raymarching. This is essentially the depth of
-  the octree
+  the octree 
    */
   auto octree_pair = wisp_spc_ops::pointcloud_to_octree(pointcloud, level);
   return new OctreeAS(octree_pair.first, octree_pair.second);
