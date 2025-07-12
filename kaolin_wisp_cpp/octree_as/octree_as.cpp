@@ -119,7 +119,7 @@ ASRaytraceResults OctreeAS::raytrace(const torch::Tensor &origins,
   Returns:
       (ASRaytraceResults): with fields containing -
           - Indices into rays.origins and rays.dirs of shape [num_intersections]
-          - Indices into the point_hierarchy of shape [num_intersections]
+          - Indices into the point_hierarchy of shape [num_intersections] 
           - Depths of shape [num_intersections, 1 or 2]
   """ */
   if (level == -1)
