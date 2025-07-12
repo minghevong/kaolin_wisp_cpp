@@ -42,6 +42,7 @@ OctreeAS::OctreeAS(const torch::Tensor &_octree,
   auto octree_info = wisp_spc_ops::octree_to_spc(octree_);
   points_ = std::get<0>(octree_info);
   pyramid_ = std::get<1>(octree_info);
+  // prefix_独占前缀和（Exclusive Sum），用于八叉叶子节点的快速索引。存储了每个节点在扁平化存储中的偏移量。
   prefix_ = std::get<2>(octree_info);
 
   max_level_ = pyramid_.size(-1) - 2;
