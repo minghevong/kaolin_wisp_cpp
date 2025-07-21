@@ -104,7 +104,8 @@ ASQueryResults OctreeAS::query(const torch::Tensor &coords, int level,
 }
 
 ASRaytraceResults OctreeAS::raytrace(const torch::Tensor &origins,
-                                     const torch::Tensor &dirs, int level,
+                                     const torch::Tensor &dirs, 
+                                     int level,
                                      bool with_exit)
 {
   /* """Traces rays against the SPC structure, returning all intersections along
@@ -113,8 +114,8 @@ ASRaytraceResults OctreeAS::raytrace(const torch::Tensor &origins,
 
   Args:
       rays (wisp.core.Rays): Ray origins and directions of shape [batch, 3].
-      level (int) : The level of the octree to raytrace. If None, traces the
-  highest level. with_exit (bool) : If True, also returns exit depth.
+      level (int) : The level of the octree to raytrace. If None, traces the highest level. 
+      with_exit (bool) : If True, also returns exit depth.
 
   Returns:
       (ASRaytraceResults): with fields containing -
@@ -126,7 +127,7 @@ ASRaytraceResults OctreeAS::raytrace(const torch::Tensor &origins,
   {
     level = max_level_;
   }
-
+  //返回： 「八叉树根节点的全局序号」 和 「对应的射线序号」对 保存在新的 nuggets 中。
   auto raytrace_results =
       kaolin::raytrace_cuda(octree_, points_, pyramid_, prefix_, origins, dirs,
                             level, true, with_exit);
