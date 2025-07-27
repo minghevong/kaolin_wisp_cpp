@@ -127,7 +127,7 @@ ASRaytraceResults OctreeAS::raytrace(const torch::Tensor &origins,
   {
     level = max_level_;
   }
-  //返回： 「八叉树根节点的全局序号」 和 「对应的射线序号」对 保存在新的 nuggets 中。以及射线起点到🍌节点的穿入和穿出点的距离。
+  //返回： 「八叉树根节点的全局序号」 和 「对应的射线序号」对 保存在新的 nuggets 中。以及射线起点到香蕉节点的穿入和穿出点的距离。
   auto raytrace_results =
       kaolin::raytrace_cuda(octree_, points_, pyramid_, prefix_, origins, dirs,
                             level, true, with_exit);
