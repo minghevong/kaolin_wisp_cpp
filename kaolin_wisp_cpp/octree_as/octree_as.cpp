@@ -175,28 +175,37 @@ ASRaymarchResults OctreeAS::_raymarch_voxel(const torch::Tensor &origins,
   // # NUM_INTERSECTIONS can be 0!
   // # ridx, pidx ~ (NUM_INTERSECTIONS,)
   // # depth ~ (NUM_INTERSECTIONS, 2)
+  //函数返回：{ridx(射线的序号), pidx(射线相交节点的全局序号), depth(射线起点到相交节点的穿入和穿出点的距离值)}
   auto raytrace_results = raytrace(origins, dirs, level, true);
   auto ridx = raytrace_results.ridx.to(torch::kLong);
   auto num_intersections = ridx.size(0);
 
-  // # depth_samples ~ (NUM_INTERSECTIONS, NUM_SAMPLES, 1)
+  // 
   auto depth = raytrace_results.depth;
+
+  // 根据设置的采样数，对射线在相交节点上的穿入点和穿出点之间均匀采样，返回 num_samples 个采样点的深度值(num_intersections, num_samples, 1)。
   auto depth_samples =
       wisp_spc_ops::sample_from_depth_intervals(depth, num_samples)
           .unsqueeze(-1);
+
+  // deltas: 计算每个射线上的采样点之间的距离差分值。
+  // torch.diff 函数用于计算张量沿指定维度中相邻元素的差分。
+  // 参数：输入张量input=(num_intersections, num_samples)，差分次数n=1，指定维度dim=-1，扩展数组长度沿指定维度添加到输入前面的值prepend=(num_intersections, 1)
   auto deltas = torch::diff(depth_samples.select(-1, 0), 1, -1,
                             depth.select(-1, 0).unsqueeze(-1))
                     .reshape({num_intersections * num_samples, 1});
 
-  // # samples ~ (NUM_INTERSECTIONS, NUM_SAMPLES, 1)
-  auto samples = torch::addcmul(origins.index({ridx}).unsqueeze(1),
-                                dirs.index({ridx}).unsqueeze(1), depth_samples);
+  // 计算每条射线上采样点的世界系3D坐标 samples = origin + direction * depth 
+  auto samples = torch::addcmul(origins.index({ridx}).unsqueeze(1),   // (num_intersections, 3, 1)  起点坐标
+                                dirs.index({ridx}).unsqueeze(1),      // (num_intersections, 3, 1)  方向向量
+                                depth_samples);                       // (num_intersections, num_samples, 1)  采样点深度值
 
   // # boundary ~ (NUM_INTERSECTIONS * NUM_SAMPLES,)
   // # (each intersected cell is sampled NUM_SAMPLES times)
+  // 根据 num_samples 值，扩展 pack_boundary 中的 1 值的位置。
   auto boundary = wisp_spc_ops::expand_pack_boundary(
-                      kaolin::mark_pack_boundaries_cuda(ridx.to(torch::kInt))
-                          .to(torch::kBool),
+                      // kaolin::mark_pack_boundaries_cuda 返回一个和ridx一样的张量，边界被设置为1，其他位置被设置为0.
+                      kaolin::mark_pack_boundaries_cuda(ridx.to(torch::kInt)).to(torch::kBool),
                       num_samples)
                       .to(torch::kBool);
 
